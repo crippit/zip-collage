@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Collage Grid Builder</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React and ReactDOM UMD CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone CDN for on-the-fly JSX transpilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <!-- Application Mount Node -->
+  <div id="root"></div>
+
+  <!-- React Code Transpiled via Babel in the Browser -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // Standardized, high-fidelity inline SVG icon replacements for zero-dependency reliability
+    const Icons = {
+      Upload: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+      ),
+      Grid: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>
+      ),
+      Download: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+      ),
+      Trash2: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          <line x1="10" y1="11" x2="10" y2="17" />
+          <line x1="14" y1="11" x2="14" y2="17" />
+        </svg>
+      ),
+      ChevronLeft: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      ),
+      ChevronRight: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      ),
+      Shuffle: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <polyline points="16 3 21 3 21 8" />
+          <line x1="4" y1="20" x2="21" y2="3" />
+          <polyline points="21 16 21 21 16 21" />
+          <line x1="15" y1="15" x2="21" y2="21" />
+          <line x1="4" y1="4" x2="9" y2="9" />
+        </svg>
+      ),
+      Settings: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      ),
+      RefreshCw: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+        </svg>
+      ),
+      Sliders: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <line x1="4" y1="21" x2="4" y2="14" />
+          <line x1="4" y1="10" x2="4" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12" y2="3" />
+          <line x1="20" y1="21" x2="20" y2="16" />
+          <line x1="20" y1="12" x2="20" y2="3" />
+          <line x1="1" y1="14" x2="7" y2="14" />
+          <line x1="9" y1="8" x2="15" y2="8" />
+          <line x1="17" y1="16" x2="23" y2="16" />
+        </svg>
+      ),
+      Sparkles: ({ className = "w-5 h-5", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />
+        </svg>
+      ),
+      Info: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+      ),
+      LinkIcon: ({ className = "w-3.5 h-3.5", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+      ),
+      Unlink: ({ className = "w-3.5 h-3.5", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <path d="M18.84 12.16a5 5 0 0 0-6.83-6.83" />
+          <path d="M10.66 11.84a5 5 0 0 0 6.83 6.83" />
+          <line x1="1" y1="1" x2="23" y2="23" />
+        </svg>
+      ),
+      Square: ({ className = "w-5 h-5", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        </svg>
+      ),
+      Smartphone: ({ className = "w-5 h-5", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+          <line x1="12" y1="18" x2="12.01" y2="18" />
+        </svg>
+      ),
+      Tv: ({ className = "w-5 h-5", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <rect x="2" y="3" width="20" height="14" rx="2" />
+          <line x1="8" y1="21" x2="16" y2="21" />
+          <line x1="12" y1="17" x2="12" y2="21" />
+        </svg>
+      ),
+      Eye: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      ),
+      EyeOff: ({ className = "w-4 h-4", ...props }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+          <line x1="1" y1="1" x2="23" y2="23" />
+        </svg>
+      )
+    };
+
+    function App() {
+      const [images, setImages] = useState([]); // Array of { id, url, name }
+      const [gridCols, setGridCols] = useState(10); // 5 to 25
+      const [gridRows, setGridRows] = useState(10); // 5 to 25
+      const [keepLinked, setKeepLinked] = useState(true); // Maintain Cols = Rows
+      const [gap, setGap] = useState(2); // Pixel gap between grid cells (0 to 20)
+      const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+      const [borderRadius, setBorderRadius] = useState(0); // px
+      const [objectFit, setObjectFit] = useState('cover'); // 'cover' | 'contain'
+      const [aspectRatioPreset, setAspectRatioPreset] = useState('square'); // 'square' | 'story' | 'widescreen'
+      const [useMargins, setUseMargins] = useState(true); // Toggle outer safety margins
+      const [blurAmount, setBlurAmount] = useState(0); // px blur filter (0 to 40)
+      
+      const [currentPage, setCurrentPage] = useState(0);
+      const [draggedIndex, setDraggedIndex] = useState(null);
+      const [selectedCell, setSelectedCell] = useState(null); // For mobile/click-to-swap
+      const [isProcessing, setIsProcessing] = useState(false);
+      const [notification, setNotification] = useState(null);
+
+      const fileInputRef = useRef(null);
+      const canvasRef = useRef(null);
+
+      // Derived Values
+      const itemsPerPage = gridCols * gridRows;
+      const totalPages = Math.max(1, Math.ceil(images.length / itemsPerPage));
+
+      // Link controls effect
+      useEffect(() => {
+        if (keepLinked && gridCols !== gridRows) {
+          setGridRows(gridCols);
+        }
+      }, [gridCols, keepLinked]);
+
+      // Reset page index if pages shrink
+      useEffect(() => {
+        if (currentPage >= totalPages) {
+          setCurrentPage(Math.max(0, totalPages - 1));
+        }
+      }, [images.length, itemsPerPage, totalPages, currentPage]);
+
+      // Show a temporary notification toast
+      const showToast = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => {
+          setNotification(null);
+        }, 3000);
+      };
+
+      // Check if file is HEIC/HEIF
+      const isHeic = (file) => {
+        const name = file.name ? file.name.toLowerCase() : '';
+        return (
+          name.endsWith('.heic') || 
+          name.endsWith('.heif') || 
+          file.type === 'image/heic' || 
+          file.type === 'image/heif'
+        );
+      };
+
+      // Dynamically load heic2any script from CDN
+      const loadHeicScript = () => {
+        return new Promise((resolve, reject) => {
+          if (window.heic2any) {
+            resolve();
+            return;
+          }
+          const script = document.createElement('script');
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js";
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Failed to load HEIC converter library."));
+          document.head.appendChild(script);
+        });
+      };
+
+      // Convert HEIC file to JPEG
+      const convertHeic = async (file) => {
+        await loadHeicScript();
+        if (!window.heic2any) {
+          throw new Error("Converter library is not ready.");
+        }
+        const convertedBlob = await window.heic2any({
+          blob: file,
+          toType: "image/jpeg",
+          quality: 0.8
+        });
+        const blob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+        return new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+      };
+
+      // Handle file uploads asynchronously to accommodate conversion
+      const handleFileUpload = async (e) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        setIsProcessing(true);
+        showToast('Processing uploaded photos...', 'info');
+
+        const newImages = [];
+        let convertedCount = 0;
+
+        try {
+          for (let file of files) {
+            let fileToProcess = file;
+
+            // Auto-detect and convert HEIC
+            if (isHeic(file)) {
+              showToast(`Converting HEIC file "${file.name}" in browser...`, 'info');
+              try {
+                fileToProcess = await convertHeic(file);
+                convertedCount++;
+              } catch (err) {
+                console.error("HEIC conversion failed for:", file.name, err);
+                showToast(`Skipped ${file.name} - converter error.`, 'error');
+                continue;
+              }
+            }
+
+            // Convert the image file to a Base64 data URL
+            const dataUrl = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = (event) => resolve(event.target.result);
+              reader.onerror = (err) => reject(err);
+              reader.readAsDataURL(fileToProcess);
+            });
+
+            newImages.push({
+              id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              url: dataUrl,
+              name: fileToProcess.name
+            });
+          }
+
+          if (newImages.length > 0) {
+            setImages((prev) => [...prev, ...newImages]);
+            const msg = convertedCount > 0 
+              ? `Successfully loaded ${newImages.length} images (converted ${convertedCount} HEIC files)!` 
+              : `Successfully loaded ${newImages.length} images!`;
+            showToast(msg, 'success');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Error uploading files.', 'error');
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      // Clear all images
+      const handleClearAll = () => {
+        setImages([]);
+        setCurrentPage(0);
+        setSelectedCell(null);
+        showToast('Cleared all images', 'info');
+      };
+
+      // Shuffle images globally
+      const handleShuffle = () => {
+        if (images.length === 0) return;
+        const shuffled = [...images].sort(() => Math.random() - 0.5);
+        setImages(shuffled);
+        showToast('Images shuffled!');
+      };
+
+      // Remove a specific image
+      const handleRemoveImage = (globalIndex) => {
+        const updated = [...images];
+        updated.splice(globalIndex, 1);
+        setImages(updated);
+        setSelectedCell(null);
+      };
+
+      // Drag and Drop events (Desktop)
+      const handleDragStart = (e, index) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = 'move';
+      };
+
+      const handleDragOver = (e) => {
+        e.preventDefault();
+      };
+
+      const handleDrop = (e, targetIndex) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+        swapImages(draggedIndex, targetIndex);
+        setDraggedIndex(null);
+      };
+
+      // Swap logic helper
+      const swapImages = (idxA, idxB) => {
+        const updated = [...images];
+        
+        // Boundary check: If the destination index is empty (out of bounds)
+        if (idxA >= updated.length || idxB >= updated.length) {
+          const targetIndex = Math.min(Math.max(0, updated.length - 1), Math.max(idxA, idxB));
+          const [movedItem] = updated.splice(idxA, 1);
+          updated.splice(targetIndex, 0, movedItem);
+          setImages(updated);
+          showToast('Image moved within layout');
+          return;
+        }
+
+        const temp = updated[idxA];
+        updated[idxA] = updated[idxB];
+        updated[idxB] = temp;
+        setImages(updated);
+        showToast('Positions swapped!');
+      };
+
+      // Click-to-swap logic (Mobile friendly)
+      const handleCellClick = (localIndex) => {
+        const globalIndex = currentPage * itemsPerPage + localIndex;
+        if (globalIndex >= images.length) return; // Empty cell
+
+        if (selectedCell === null) {
+          setSelectedCell(globalIndex);
+          showToast('Select another image to swap positions');
+        } else {
+          if (selectedCell !== globalIndex) {
+            swapImages(selectedCell, globalIndex);
+          }
+          setSelectedCell(null);
+        }
+      };
+
+      // Get current page's slice of images
+      const getPageImages = () => {
+        const start = currentPage * itemsPerPage;
+        return images.slice(start, start + itemsPerPage);
+      };
+
+      // Render high-res custom canvas & trigger download
+      const downloadCanvasPage = (pageIdx) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        
+        // Establish output dimensions based on user's active preset
+        let width = 1080;
+        let height = 1080;
+        
+        if (aspectRatioPreset === 'story') {
+          width = 1080;
+          height = 1920;
+        } else if (aspectRatioPreset === 'widescreen') {
+          width = 1920;
+          height = 1080;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Fill background
+        ctx.fillStyle = backgroundColor;
+        ctx.fillRect(0, 0, width, height);
+
+        // Apply structured margin framework (4% safe-margin or 0% for full bleed)
+        const marginX = useMargins ? width * 0.04 : 0;
+        const marginY = useMargins ? height * 0.04 : 0;
+        const availableWidth = width - marginX * 2;
+        const availableHeight = height - marginY * 2;
+
+        const totalGapsX = gridCols - 1;
+        const totalGapsY = gridRows - 1;
+
+        // Calculate maximum possible square cell size to fit nicely
+        const maxCellWidth = (availableWidth - (totalGapsX * gap)) / gridCols;
+        const maxCellHeight = (availableHeight - (totalGapsY * gap)) / gridRows;
+        const cellSize = Math.min(maxCellWidth, maxCellHeight);
+
+        // Centering offsets
+        const gridWidth = gridCols * cellSize + totalGapsX * gap;
+        const gridHeight = gridRows * cellSize + totalGapsY * gap;
+        const startX = marginX + (availableWidth - gridWidth) / 2;
+        const startY = marginY + (availableHeight - gridHeight) / 2;
+
+        const startIdx = pageIdx * itemsPerPage;
+        const pageSlice = images.slice(startIdx, startIdx + itemsPerPage);
+
+        let loadedImagesCount = 0;
+        const imagesToLoad = pageSlice.length;
+
+        if (imagesToLoad === 0) {
+          showToast('No images to draw on this page!', 'error');
+          return;
+        }
+
+        setIsProcessing(true);
+
+        pageSlice.forEach((imgData, index) => {
+          const col = index % gridCols;
+          const row = Math.floor(index / gridCols);
+
+          const x = startX + col * (cellSize + gap);
+          const y = startY + row * (cellSize + gap);
+
+          if (!imgData || !imgData.url) {
+            ctx.fillStyle = backgroundColor;
+            ctx.fillRect(x, y, cellSize, cellSize);
+            incrementLoadedCount();
+            return;
+          }
+
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.src = imgData.url;
+
+          img.onload = () => {
+            ctx.save();
+            
+            // Apply Rounded Corners if supported and configured
+            if (borderRadius > 0) {
+              ctx.beginPath();
+              if (typeof ctx.roundRect === 'function') {
+                ctx.roundRect(x, y, cellSize, cellSize, borderRadius);
+              } else {
+                ctx.rect(x, y, cellSize, cellSize);
+              }
+              ctx.clip();
+            }
+
+            // Draw square cell handling 'cover' or 'contain'
+            const imgRatio = img.width / img.height;
+            const cellRatio = 1.0;
+            
+            let drawWidth, drawHeight, offsetX, offsetY;
+
+            if (objectFit === 'cover') {
+              if (imgRatio > cellRatio) {
+                drawHeight = cellSize;
+                drawWidth = cellSize * imgRatio;
+                offsetX = x - (drawWidth - cellSize) / 2;
+                offsetY = y;
+              } else {
+                drawWidth = cellSize;
+                drawHeight = cellSize / imgRatio;
+                offsetX = x;
+                offsetY = y - (drawHeight - cellSize) / 2;
+              }
+            } else { // 'contain'
+              if (imgRatio > cellRatio) {
+                drawWidth = cellSize;
+                drawHeight = cellSize / imgRatio;
+                offsetX = x;
+                offsetY = y + (cellSize - drawHeight) / 2;
+              } else {
+                drawHeight = cellSize;
+                drawWidth = cellSize * imgRatio;
+                offsetX = x + (cellSize - drawWidth) / 2;
+                offsetY = y;
+              }
+              // Pre-fill background cell for contain
+              ctx.fillStyle = backgroundColor;
+              ctx.fillRect(x, y, cellSize, cellSize);
+            }
+
+            // Apply Overall Blur Filter on the offline canvas during drawing
+            if (blurAmount > 0) {
+              ctx.filter = `blur(${blurAmount}px)`;
+            }
+
+            ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+            ctx.restore();
+
+            incrementLoadedCount();
+          };
+
+          img.onerror = () => {
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(x, y, cellSize, cellSize);
+            incrementLoadedCount();
+          };
+        });
+
+        function incrementLoadedCount() {
+          loadedImagesCount++;
+          if (loadedImagesCount === imagesToLoad) {
+            try {
+              const dataUrl = canvas.toDataURL('image/png');
+              const link = document.createElement('a');
+              link.download = `collage-grid-page-${pageIdx + 1}-${aspectRatioPreset}-${gridCols}x${gridRows}.png`;
+              link.href = dataUrl;
+              link.click();
+              showToast(`Collage Page ${pageIdx + 1} downloaded successfully!`);
+            } catch (err) {
+              console.error(err);
+              showToast('Failed to export canvas due to image host policies.', 'error');
+            }
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      const pageImages = getPageImages();
+      const gridCells = Array.from({ length: itemsPerPage });
+
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
+          {/* Toast Notification */}
+          {notification && (
+            <div className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-2xl border transition-all duration-300 transform translate-y-0 ${
+              notification.type === 'error' ? 'bg-red-500/90 border-red-400 text-white' : 
+              notification.type === 'info' ? 'bg-blue-500/90 border-blue-400 text-white' :
+              'bg-emerald-500/90 border-emerald-400 text-white'
+            }`}>
+              <Icons.Sparkles className="w-5 h-5 animate-pulse text-yellow-300" />
+              <span className="font-medium text-sm">{notification.message}</span>
+            </div>
+          )}
+
+          {/* Main Header */}
+          <header className="bg-slate-800 border-b border-slate-700 py-4 px-6 sticky top-0 z-40 shadow-md">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-tr from-indigo-500 to-violet-600 rounded-xl shadow-lg shadow-indigo-500/20">
+                  <Icons.Grid className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                    Photo Collage Grid Builder
+                  </h1>
+                  <p className="text-xs text-slate-400">Generate high-res multi-page collages for Instagram, Widescreen & feeds</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 transform active:scale-95 shadow-lg shadow-indigo-500/10"
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <Icons.RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Icons.Upload className="w-4 h-4" />
+                  )}
+                  Upload Photos
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  multiple
+                  accept="image/*,.heic,.heif"
+                  className="hidden"
+                />
+                {images.length > 0 && (
+                  <>
+                    <button
+                      onClick={handleShuffle}
+                      className="flex items-center gap-2 bg-slate-700 hover:bg-slate-650 text-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                      title="Shuffle photo sequence"
+                    >
+                      <Icons.Shuffle className="w-4 h-4" />
+                      Shuffle
+                    </button>
+                    <button
+                      onClick={handleClearAll}
+                      className="flex items-center gap-2 bg-red-950/40 hover:bg-red-900/40 text-red-400 px-4 py-2.5 rounded-xl text-sm font-semibold border border-red-900/50 transition-all"
+                    >
+                      <Icons.Trash2 className="w-4 h-4" />
+                      Clear All
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {/* App Body Container */}
+          <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* LEFT COLUMN: Controls & Settings (4 Cols) */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+              
+              {/* Section 1: Aspect Ratio Selection */}
+              <section className="bg-slate-800 rounded-2xl p-5 border border-slate-700/85 shadow-sm">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                  <Icons.Grid className="w-4 h-4 text-indigo-400" /> Output Format / Aspect
+                </h2>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => {
+                      setAspectRatioPreset('square');
+                      showToast('Format set to Square (1:1)');
+                    }}
+                    className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl border text-center transition-all ${
+                      aspectRatioPreset === 'square'
+                        ? 'bg-indigo-650 border-indigo-500 text-white shadow-md shadow-indigo-500/10'
+                        : 'bg-slate-900/80 border-slate-750 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }`}
+                  >
+                    <Icons.Square className="w-5 h-5 mb-1.5" />
+                    <span className="text-xs font-bold block">Square</span>
+                    <span className="text-[9px] opacity-75">1:1 (1080px)</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setAspectRatioPreset('story');
+                      showToast('Format set to IG Story (9:16)');
+                    }}
+                    className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl border text-center transition-all ${
+                      aspectRatioPreset === 'story'
+                        ? 'bg-indigo-650 border-indigo-500 text-white shadow-md shadow-indigo-500/10'
+                        : 'bg-slate-900/80 border-slate-750 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }`}
+                  >
+                    <Icons.Smartphone className="w-5 h-5 mb-1.5" />
+                    <span className="text-xs font-bold block">IG Story</span>
+                    <span className="text-[9px] opacity-75">9:16 (1920h)</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setAspectRatioPreset('widescreen');
+                      showToast('Format set to Widescreen (16:9)');
+                    }}
+                    className={`flex flex-col items-center justify-center py-3 px-2 rounded-xl border text-center transition-all ${
+                      aspectRatioPreset === 'widescreen'
+                        ? 'bg-indigo-650 border-indigo-500 text-white shadow-md shadow-indigo-500/10'
+                        : 'bg-slate-900/80 border-slate-750 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    }`}
+                  >
+                    <Icons.Tv className="w-5 h-5 mb-1.5" />
+                    <span className="text-xs font-bold block">Widescreen</span>
+                    <span className="text-[9px] opacity-75">16:9 (1080h)</span>
+                  </button>
+                </div>
+              </section>
+
+              {/* Section 2: Dynamic Grid Configuration */}
+              <section className="bg-slate-800 rounded-2xl p-5 border border-slate-700/85 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <Icons.Sliders className="w-4 h-4 text-indigo-400" /> Grid Dimensions
+                  </h2>
+                  {/* Linked / Equal Ratio constraint toggle */}
+                  <button
+                    onClick={() => {
+                      setKeepLinked(!keepLinked);
+                      if (!keepLinked) {
+                        setGridRows(gridCols); // immediately align when linking
+                      }
+                      showToast(!keepLinked ? 'Linked columns & rows (1:1)' : 'Unlinked dimensions', 'info');
+                    }}
+                    className={`flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all ${
+                      keepLinked 
+                        ? 'bg-indigo-950/60 text-indigo-300 border-indigo-850/70' 
+                        : 'bg-slate-900 text-slate-500 border-slate-850'
+                    }`}
+                    title="Force grid aspect ratio to always be square"
+                  >
+                    {keepLinked ? <Icons.LinkIcon className="w-3.5 h-3.5" /> : <Icons.Unlink className="w-3.5 h-3.5" />}
+                    {keepLinked ? 'Linked (1:1)' : 'Free Aspect'}
+                  </button>
+                </div>
+                
+                <div className="space-y-5">
+                  {/* Columns Slider */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-slate-300 font-medium">Grid Columns</span>
+                      <span className="text-indigo-400 font-bold bg-indigo-950/50 px-2 py-0.5 rounded-md text-xs">
+                        {`${gridCols} cols`}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="25"
+                      value={gridCols}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setGridCols(val);
+                        if (keepLinked) {
+                          setGridRows(val);
+                        }
+                        setSelectedCell(null);
+                      }}
+                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
+
+                  {/* Rows Slider */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-slate-300 font-medium">Grid Rows</span>
+                      <span className="text-indigo-400 font-bold bg-indigo-950/50 px-2 py-0.5 rounded-md text-xs">
+                        {`${gridRows} rows`}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="25"
+                      value={gridRows}
+                      disabled={keepLinked}
+                      onChange={(e) => {
+                        setGridRows(parseInt(e.target.value));
+                        setSelectedCell(null);
+                      }}
+                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Summary Stats */}
+                  <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-750 text-xs flex justify-between items-center text-slate-400">
+                    <span>Cells per Page: <strong className="text-slate-200">{itemsPerPage}</strong></span>
+                    <span>Total Uploads: <strong className="text-slate-200">{images.length}</strong></span>
+                  </div>
+                </div>
+              </section>
+
+              {/* Section 3: Visual Styles */}
+              <section className="bg-slate-800 rounded-2xl p-5 border border-slate-700/85 shadow-sm">
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                  <Icons.Settings className="w-4 h-4 text-indigo-400" /> Styling Customization
+                </h2>
+
+                <div className="space-y-4">
+                  {/* Spacing / Gap Slider */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-slate-300 font-medium">Grid Gap (Spacing)</span>
+                      <span className="text-indigo-400 font-semibold">{`${gap}px`}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="20"
+                      value={gap}
+                      onChange={(e) => setGap(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
+
+                  {/* Outer Margin Toggle (Border Margin) */}
+                  <div className="flex items-center justify-between py-1.5 border-b border-slate-700/50">
+                    <div className="flex flex-col">
+                      <span className="text-sm text-slate-300 font-medium">Outer Borders / Margins</span>
+                      <span className="text-[10px] text-slate-500">Uncheck for full bleed edge-to-edge</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setUseMargins(!useMargins);
+                        showToast(!useMargins ? 'Outer margins enabled' : 'Full-bleed mode (No margins) enabled', 'info');
+                      }}
+                      className={`flex items-center justify-center p-1.5 rounded-lg border transition-all ${
+                        useMargins 
+                          ? 'bg-indigo-950/50 text-indigo-400 border-indigo-900/50' 
+                          : 'bg-slate-900 text-slate-500 border-slate-880'
+                      }`}
+                      title="Toggle margins surrounding the grid layout"
+                    >
+                      {useMargins ? <Icons.Eye className="w-4 h-4" /> : <Icons.EyeOff className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  {/* Image Blur Slider */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-slate-300 font-medium">Overall Image Blur</span>
+                      <span className="text-indigo-400 font-semibold">{`${blurAmount}px`}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="40"
+                      value={blurAmount}
+                      onChange={(e) => setBlurAmount(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
+
+                  {/* Background Color Picker */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-300 font-medium">Background Color</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={backgroundColor}
+                        onChange={(e) => setBackgroundColor(e.target.value)}
+                        className="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0"
+                      />
+                      <input
+                        type="text"
+                        value={backgroundColor}
+                        onChange={(e) => setBackgroundColor(e.target.value)}
+                        className="w-20 text-center bg-slate-900 text-slate-300 text-xs py-1 rounded-md border border-slate-700 font-mono uppercase"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Corner Radius */}
+                  <div>
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="text-slate-300 font-medium">Photo Border Radius</span>
+                      <span className="text-indigo-400 font-semibold">{`${borderRadius}px`}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="50"
+                      value={borderRadius}
+                      onChange={(e) => setBorderRadius(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
+
+                  {/* Image Fit Type */}
+                  <div>
+                    <span className="text-sm text-slate-300 font-medium block mb-2">Aspect Crop Strategy</span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setObjectFit('cover')}
+                        className={`py-2 px-3 text-xs font-semibold rounded-xl border transition-all ${
+                          objectFit === 'cover' 
+                            ? 'bg-indigo-650 text-white border-indigo-500 shadow-md shadow-indigo-500/10' 
+                            : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-slate-300'
+                        }`}
+                      >
+                        Crop & Fill (Cover)
+                      </button>
+                      <button
+                        onClick={() => setObjectFit('contain')}
+                        className={`py-2 px-3 text-xs font-semibold rounded-xl border transition-all ${
+                          objectFit === 'contain' 
+                        ? 'bg-indigo-650 text-white border-indigo-500 shadow-md shadow-indigo-500/10' 
+                        : 'bg-slate-900 text-slate-400 border-slate-700 hover:text-slate-300'
+                        }`}
+                      >
+                        Fit Whole Photo (Contain)
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Section 4: Interactive Help / instructions */}
+              <section className="bg-gradient-to-br from-slate-800/80 to-slate-900/40 rounded-2xl p-4 border border-slate-700/60">
+                <h3 className="text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                  <Icons.Info className="w-4 h-4 text-indigo-400" /> Layout Instructions
+                </h3>
+                <ul className="text-xs text-slate-400 space-y-1.5 list-disc pl-4">
+                  <li>Toggle <strong>Borders/Margins</strong> to switch between full bleed and framed grids.</li>
+                  <li>Applying <strong>Blur</strong> preserves sharp borders of individual collage cuts automatically.</li>
+                  <li><strong>Drag & Drop</strong> to organize layout slots.</li>
+                </ul>
+              </section>
+            </div>
+
+            {/* RIGHT COLUMN: Canvas Workspace (8 Cols) */}
+            <div className="lg:col-span-8 flex flex-col gap-4">
+              
+              {/* Grid Preview Header */}
+              <div className="bg-slate-800 rounded-2xl p-4 border border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="bg-indigo-900/60 text-indigo-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-indigo-700/50">
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+                  <span className="text-slate-400 text-xs font-medium">
+                    Showing {pageImages.length} of {images.length} photos
+                  </span>
+                </div>
+
+                {/* Pagination controls */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                    disabled={currentPage === 0}
+                    className="p-2 rounded-lg bg-slate-700 hover:bg-slate-650 text-slate-300 disabled:opacity-30 disabled:pointer-events-none transition"
+                  >
+                    <Icons.ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-xs font-semibold text-slate-300 px-2">
+                    Page {currentPage + 1}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))}
+                    disabled={currentPage >= totalPages - 1}
+                    className="p-2 rounded-lg bg-slate-700 hover:bg-slate-650 text-slate-300 disabled:opacity-30 disabled:pointer-events-none transition"
+                  >
+                    <Icons.ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Interactive Live Preview Board */}
+              <div className="relative bg-slate-950 rounded-2xl border border-slate-800 p-6 flex flex-col items-center justify-center min-h-[500px]">
+                
+                {images.length === 0 ? (
+                  // Empty State
+                  <div className="text-center py-16 px-4">
+                    <div className="w-20 h-20 bg-slate-900 border border-slate-800 rounded-full flex items-center justify-center mx-auto mb-5 text-slate-600 animate-bounce flex items-center justify-center">
+                      <Icons.Upload className="w-10 h-10 text-indigo-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-200">Start by Uploading Images</h3>
+                    <p className="text-slate-400 text-sm max-w-sm mt-2 mb-6">
+                      Select and upload high resolution photos (including HEIC formats!) to instantly segment them across customizable collage grids!
+                    </p>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-md shadow-indigo-500/10"
+                      disabled={isProcessing}
+                    >
+                      Browse Files
+                    </button>
+                  </div>
+                ) : (
+                  // Active Canvas Preview Grid
+                  <div className="w-full flex flex-col items-center gap-6">
+                    
+                    {/* Dynamic Aspect Box representing the selected aspect ratio */}
+                    <div className="w-full relative shadow-2xl overflow-hidden transition-all duration-300 border border-slate-700/50 flex items-center justify-center bg-cover bg-center"
+                         style={{ 
+                           backgroundColor: backgroundColor,
+                           // Use responsive max-sizing matching standard aspects
+                           maxWidth: aspectRatioPreset === 'square' ? '450px' : aspectRatioPreset === 'story' ? '330px' : '580px',
+                           aspectRatio: aspectRatioPreset === 'square' ? '1/1' : aspectRatioPreset === 'story' ? '9/16' : '16/9',
+                           padding: useMargins ? '24px' : '0px' // toggle preview spacing
+                         }}
+                    >
+                      {/* Aspect-Locked Square Grid Box representing the actual square collage sheet centered inside */}
+                      <div 
+                        className="w-full h-full max-w-full max-h-full grid transition-all"
+                        style={{
+                          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+                          gridTemplateRows: `repeat(${gridRows}, 1fr)`,
+                          gap: `${gap * 0.45}px`, // Scaled preview gap
+                          padding: `${gap * 0.25}px`,
+                          aspectRatio: `${gridCols} / ${gridRows}`
+                        }}
+                      >
+                        {gridCells.map((_, index) => {
+                          const imageItem = pageImages[index];
+                          const globalIndex = currentPage * itemsPerPage + index;
+                          const isSelected = selectedCell === globalIndex;
+
+                          return (
+                            <div
+                              key={index}
+                              draggable={!!imageItem}
+                              onDragStart={(e) => handleDragStart(e, globalIndex)}
+                              onDragOver={handleDragOver}
+                              onDrop={(e) => handleDrop(e, globalIndex)}
+                              onClick={() => handleCellClick(index)}
+                              className={`relative group select-none cursor-pointer overflow-hidden transition-all duration-200 ${
+                                imageItem ? 'hover:scale-[1.03] hover:z-10 animate-fade-in' : 'bg-slate-900/30 border border-slate-800/30'
+                              } ${isSelected ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-slate-900 scale-95 z-20' : ''}`}
+                              style={{
+                                borderRadius: `${borderRadius * 0.4}px` // scaled radius
+                              }}
+                            >
+                              {imageItem ? (
+                                <>
+                                  <img
+                                    src={imageItem.url}
+                                    alt={imageItem.name}
+                                    className="w-full h-full object-cover transition-transform"
+                                    style={{
+                                      objectFit: objectFit,
+                                      pointerEvents: 'none', // allow drag events on container
+                                      filter: blurAmount > 0 ? `blur(${blurAmount * 0.3}px)` : 'none' // preview image blur
+                                    }}
+                                  />
+                                  {/* Overlay for quick action */}
+                                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveImage(globalIndex);
+                                      }}
+                                      className="p-1.5 bg-red-600 hover:bg-red-500 rounded-lg text-white"
+                                      title="Delete photo"
+                                    >
+                                      <Icons.Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </>
+                              ) : (
+                                // Empty grid filler slot
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className="text-[9px] text-slate-700 font-mono select-none">
+                                    {index + 1}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Grid & Canvas actions */}
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                      <button
+                        onClick={() => downloadCanvasPage(currentPage)}
+                        disabled={isProcessing || pageImages.length === 0}
+                        className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all duration-200 transform active:scale-95 shadow-lg shadow-emerald-500/10"
+                      >
+                        {isProcessing ? (
+                          <Icons.RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Icons.Download className="w-4 h-4" />
+                        )}
+                        Download Page {currentPage + 1} ({aspectRatioPreset === 'square' ? '1080x1080' : aspectRatioPreset === 'story' ? '1080x1920' : '1920x1080'}px)
+                      </button>
+
+                      {totalPages > 1 && (
+                        <button
+                          onClick={async () => {
+                            for (let p = 0; p < totalPages; p++) {
+                              downloadCanvasPage(p);
+                              await new Promise(resolve => setTimeout(resolve, 800));
+                            }
+                          }}
+                          className="flex items-center gap-2 bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-850 px-5 py-3 rounded-xl font-bold text-sm transition-all"
+                        >
+                          <Icons.Download className="w-4 h-4" />
+                          Download All {totalPages} Pages
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Subtitle / resolution stamp */}
+                    <div className="text-center text-xs text-slate-500">
+                      Outputs high-resolution, print-ready PNG files.
+                    </div>
+
+                  </div>
+                )}
+              </div>
+
+              {/* Hidden Canvas used for high-res offline rendering */}
+              <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+            </div>
+          </main>
+
+          {/* App Footer */}
+          <footer className="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500">
+            <p>© 2026 Grid Photo Collage Builder. Drag, style, swap, and download pixel-perfect print sheets.</p>
+          </footer>
+        </div>
+      );
+    }
+
+    // React Bootstrapping for Single HTML File
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
