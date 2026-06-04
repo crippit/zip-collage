@@ -478,16 +478,14 @@
           img.onload = () => {
             ctx.save();
             
-            // Apply Rounded Corners if supported and configured
-            if (borderRadius > 0) {
-              ctx.beginPath();
-              if (typeof ctx.roundRect === 'function') {
-                ctx.roundRect(x, y, cellSize, cellSize, borderRadius);
-              } else {
-                ctx.rect(x, y, cellSize, cellSize);
-              }
-              ctx.clip();
+            // Always clip to cell bounds to prevent bleed, apply radius if needed
+            ctx.beginPath();
+            if (borderRadius > 0 && typeof ctx.roundRect === 'function') {
+              ctx.roundRect(x, y, cellSize, cellSize, borderRadius);
+            } else {
+              ctx.rect(x, y, cellSize, cellSize);
             }
+            ctx.clip();
 
             // Draw square cell handling 'cover' or 'contain'
             const imgRatio = img.width / img.height;
@@ -563,6 +561,9 @@
 
       const pageImages = getPageImages();
       const gridCells = Array.from({ length: itemsPerPage });
+
+      // Calculate relative scale for accurate preview rendering based on true export size
+      const previewScale = aspectRatioPreset === 'square' ? (450 / 1080) : aspectRatioPreset === 'story' ? (330 / 1080) : (580 / 1920);
 
       return (
         <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
@@ -988,7 +989,7 @@
                            // Use responsive max-sizing matching standard aspects
                            maxWidth: aspectRatioPreset === 'square' ? '450px' : aspectRatioPreset === 'story' ? '330px' : '580px',
                            aspectRatio: aspectRatioPreset === 'square' ? '1/1' : aspectRatioPreset === 'story' ? '9/16' : '16/9',
-                           padding: useMargins ? '24px' : '0px' // toggle preview spacing
+                           padding: useMargins ? '4%' : '0px' // perfectly match the 4% margin in canvas output
                          }}
                     >
                       {/* Aspect-Locked Square Grid Box representing the actual square collage sheet centered inside */}
@@ -997,8 +998,7 @@
                         style={{
                           gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
                           gridTemplateRows: `repeat(${gridRows}, 1fr)`,
-                          gap: `${gap * 0.45}px`, // Scaled preview gap
-                          padding: `${gap * 0.25}px`,
+                          gap: `${gap * previewScale}px`, // Exactly scaled preview gap
                           aspectRatio: `${gridCols} / ${gridRows}`
                         }}
                       >
@@ -1019,7 +1019,7 @@
                                 imageItem ? 'hover:scale-[1.03] hover:z-10 animate-fade-in' : 'bg-slate-900/30 border border-slate-800/30'
                               } ${isSelected ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-slate-900 scale-95 z-20' : ''}`}
                               style={{
-                                borderRadius: `${borderRadius * 0.4}px` // scaled radius
+                                borderRadius: `${borderRadius * previewScale}px` // Exactly scaled radius
                               }}
                             >
                               {imageItem ? (
@@ -1031,7 +1031,7 @@
                                     style={{
                                       objectFit: objectFit,
                                       pointerEvents: 'none', // allow drag events on container
-                                      filter: blurAmount > 0 ? `blur(${blurAmount * 0.3}px)` : 'none' // preview image blur
+                                      filter: blurAmount > 0 ? `blur(${blurAmount * previewScale}px)` : 'none' // Exactly scaled preview image blur
                                     }}
                                   />
                                   {/* Overlay for quick action */}
